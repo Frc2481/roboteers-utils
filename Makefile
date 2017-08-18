@@ -2,7 +2,7 @@ BUILD_ARCH ?= $(shell uname -m)
 BUILD_TYPE ?= Release
 SOURCE_DIR = $(patsubst %/,%,${PWD})
 BINARY_DIR = .build/$(BUILD_ARCH)/$(BUILD_TYPE)
-CMAKE ?= /usr/local/bin/cmake
+CMAKE ?= cmake
 
 %: cmake
 	cd ${BINARY_DIR}; ${MAKE} ${MAKE_FLAGS} $@
@@ -15,5 +15,8 @@ install: cmake
 
 clean: cmake
 	cd ${BINARY_DIR}; ${MAKE} ${MAKE_FLAGS} clean
+	
+test:
+	cd ${BINARY_DIR}; ./r201x-tests
 
-.PHONY: cmake install clean
+.PHONY: cmake install clean test

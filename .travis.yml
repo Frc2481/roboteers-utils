@@ -1,0 +1,11 @@
+language: cpp
+compiler: g++
+script: make all && make test
+addons:
+  apt:
+    packages:
+      - cmake-data
+      - cmake
+      
+before_install:
+- echo $(which cmake)
