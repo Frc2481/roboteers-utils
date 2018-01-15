@@ -1,72 +1,36 @@
 #cmake_minimum_required (VERSION 3.4.3)
 set (CMAKE_CXX_STANDARD 11)
 
+add_subdirectory(googletest)
+
 project (r201x-tests)
-
-
-# We need thread support
-find_package(Threads REQUIRED)
-
-# Enable ExternalProject CMake module
-include(ExternalProject)
-
-# Download and install GoogleTest
-ExternalProject_Add(
-    gtest
-    URL https://github.com/google/googletest/archive/master.zip
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
-    # Disable install step
-    INSTALL_COMMAND ""
-)
-
-# Get GTest source and binary directories from CMake project
-ExternalProject_Get_Property(gtest source_dir binary_dir)
-
-# Create a libgtest target to be used as a dependency by test programs
-add_library(libgtest IMPORTED STATIC GLOBAL)
-add_dependencies(libgtest gtest)
-
-# Set libgtest properties
-set_target_properties(libgtest PROPERTIES
-    "IMPORTED_LOCATION" "${binary_dir}/googlemock/gtest/libgtest.a"
-    "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}"
-)
-
-# Create a libgmock target to be used as a dependency by test programs
-add_library(libgmock IMPORTED STATIC GLOBAL)
-add_dependencies(libgmock gtest)
-
-# Set libgmock properties
-set_target_properties(libgmock PROPERTIES
-    "IMPORTED_LOCATION" "${binary_dir}/googlemock/libgmock.a"
-    "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}"
-)
-
-# I couldn't make it work with INTERFACE_INCLUDE_DIRECTORIES
-include_directories("${source_dir}/googletest/include"
-                    "${source_dir}/googlemock/include")
-                    
-
-
 
 include_directories(src)
 
-file(GLOB_RECURSE SOURCES test/*.cpp)
-file(GLOB UTILSOURCES "src/utils/*.cpp")
-set(SOURCES ${SOURCES} ${UTILSOURCES})
-file(GLOB UTILSOURCES "src/utils/*.h")
+file(GLOB_RECURSE SRCS src/*.cpp)
+file(GLOB_RECURSE HDRS src/*.h)
 
-set(SOURCES ${SOURCES} ${UTILSOURCES})
+add_library(${PROJECT_NAME}-lib ${SRCS} ${HDRS})
+target_link_libraries(${PROJECT_NAME}-lib ${libs})
 
-MESSAGE(SOURCES ${SOURCES})
+# If we add libraries then we need these.
+#add_executable(${PROJECT_NAME} "main.cpp")
+#target_link_libraries(${PROJECT_NAME} ${libs} ${PROJECT_NAME}-lib)
 
-#include_directories("/Users/kyle/src/googletest/googletest/include")
-add_executable(r201x-tests ${SOURCES} test/main.cpp)
-
-
-target_link_libraries(r201x-tests
-    libgtest
-    libgmock
+install(
+    TARGETS ${PROJECT_NAME}-lib 
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
 )
 
-install(TARGETS r201x-tests DESTINATION bin)
+### TESTS
+    file(GLOB_RECURSE TEST_SRCS test/*.cpp)
+    file(GLOB_RECURSE TEST_HDRS test/*.h)
+
+    add_executable(${PROJECT_NAME}-tests ${TEST_SRCS} ${TEST_HDRS})
+    target_link_libraries(${PROJECT_NAME}-tests ${WHOLE_ARCHIVE} ${PROJECT_NAME}-lib ${NO_WHOLE_ARCHIVE} gtest_main gtest)
+    target_include_directories(${PROJECT_NAME}-tests PRIVATE test)
+    set_target_properties(${PROJECT_NAME}-tests PROPERTIES COMPILE_FLAGS "-DTEST_DIR=\\\"${CMAKE_CURRENT_LIST_DIR}/test/\\\"")
+
+### TESTS
+
