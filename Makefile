@@ -17,6 +17,6 @@ clean: cmake
 	cd ${BINARY_DIR}; ${MAKE} ${MAKE_FLAGS} clean
 	
 test:
-	cd ${BINARY_DIR}; ./r201x-tests
+	cd ${BINARY_DIR}; ./r201x-tests-tests
 
 .PHONY: cmake install clean test
