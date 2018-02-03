@@ -57,3 +57,11 @@ TEST(RotationTest, Interpolate) {
 	EXPECT_NEAR(sin(17.5 * M_PI / 180), interpolated.getSin(), 1E-3);
 	EXPECT_NEAR(cos(17.5 * M_PI / 180), interpolated.getCos(), 1E-3);
 }
+
+TEST(RotationTest, Tan) {
+    Rotation2D rotation = Rotation2D::fromDegrees(-122);
+    EXPECT_NEAR(1.6, rotation.getTan(), 1E-2);
+
+    rotation = Rotation2D::fromDegrees(240);
+    EXPECT_NEAR(1.73, rotation.getTan(), 1E-2);
+}
